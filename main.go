@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gmhorn/aoc21/solutions"
+	"github.com/gmhorn/aoc21/solutions/day1"
+	"github.com/gmhorn/aoc21/solutions/day2"
 )
 
 type solution interface {
-	Part1() (int, error)
-	Part2() (int, error)
+	Part1(input string) (int, error)
+	Part2(input string) (int, error)
 }
 
 var solns = []solution{
-	solutions.Day1{},
+	day1.Solution{},
+	day2.Solution{},
 }
 
 func main() {
@@ -28,28 +30,28 @@ func main() {
 
 	// Days are 1-indexed, arrays are 0-indexed
 	soln := solns[day-1]
+	input := fmt.Sprintf("input/day%d.txt", day)
 
 	switch part {
 	case 1:
-		runSolution(day, part, soln.Part1)
+		runSolution(fmt.Sprintf("Day %d, Part 1:", day), input, soln.Part1)
 	case 2:
-		runSolution(day, part, soln.Part2)
+		runSolution(fmt.Sprintf("Day %d, Part 2:", day), input, soln.Part2)
 	default:
-		runSolution(day, 1, soln.Part1)
+		runSolution(fmt.Sprintf("Day %d, Part 1:", day), input, soln.Part1)
 		fmt.Println()
-		runSolution(day, 2, soln.Part2)
+		runSolution(fmt.Sprintf("Day %d, Part 2:", day), input, soln.Part2)
 	}
 }
 
-func runSolution(day, part int, fn func() (int, error)) {
+func runSolution(title, input string, fn func(string) (int, error)) {
 	start := time.Now()
 	defer func() {
 		fmt.Printf("(Took %s)\n", time.Since(start))
 	}()
 
-	fmt.Printf("Day %d, Part %d:\n", day, part)
-
-	ans, err := fn()
+	fmt.Println(title)
+	ans, err := fn(input)
 	if err != nil {
 		fmt.Printf("Error ocurred: %v\n", err)
 		return

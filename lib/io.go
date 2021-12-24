@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// ReadLinesToInts attempts to parse the file at the given path as a newline-
+// separated list of ints.
 func ReadLinesToInts(path string) ([]int, error) {
 	lines, err := ReadLines(path)
 	if err != nil {
@@ -25,6 +27,7 @@ func ReadLinesToInts(path string) ([]int, error) {
 	return data, nil
 }
 
+// ReadLines parses the file at the given path into individual lines.
 func ReadLines(path string) ([]string, error) {
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
