@@ -1,4 +1,4 @@
-package main
+package day2
 
 import (
 	"fmt"
@@ -7,6 +7,26 @@ import (
 
 	"github.com/gmhorn/aoc21/lib"
 )
+
+type Solution struct{}
+
+func (sln Solution) Part1(input string) (int, error) {
+	s, err := computeState(input, simple)
+	if err != nil {
+		return -1, err
+	}
+
+	return s.x * s.y, nil
+}
+
+func (sln Solution) Part2(input string) (int, error) {
+	s, err := computeState(input, complex)
+	if err != nil {
+		return -1, err
+	}
+
+	return s.x * s.y, nil
+}
 
 type state struct {
 	x, y, aim int
@@ -29,12 +49,24 @@ var simple = behavior{
 	},
 }
 
-func process(input string, behavior behavior) (int, error) {
+var complex = behavior{
+	down: func(amt int, old state) state {
+		return old
+	},
+	up: func(amt int, old state) state {
+		return old
+	},
+	forward: func(amt int, old state) state {
+		return old
+	},
+}
+
+func computeState(input string, behavior behavior) (state, error) {
 	s := state{}
 
 	lines, err := lib.ReadLines(input)
 	if err != nil {
-		return -1, err
+		return s, err
 	}
 
 	for idx, line := range lines {
@@ -42,7 +74,7 @@ func process(input string, behavior behavior) (int, error) {
 		action := parts[0]
 		amt, err := strconv.Atoi(parts[1])
 		if err != nil {
-			return -1, fmt.Errorf("could not parse line %d: %v", idx, err)
+			return s, fmt.Errorf("could not parse line %d: %v", idx, err)
 		}
 
 		switch action {
@@ -55,13 +87,5 @@ func process(input string, behavior behavior) (int, error) {
 		}
 	}
 
-	return s.x * s.y, nil
-}
-
-func main() {
-	lib.PrintSolution("Day 2, Part 1", func() (int, error) {
-		return process("input.txt", simple)
-	})
-	fmt.Println()
-
+	return s, nil
 }

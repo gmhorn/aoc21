@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// PrintSolution prints
 func PrintSolution(name string, soln func() (int, error)) {
 	start := time.Now()
 	defer func() {
