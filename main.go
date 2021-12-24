@@ -15,7 +15,6 @@ type solution interface {
 
 var solns = []solution{
 	solutions.Day1{},
-	solutions.Day2{},
 }
 
 func main() {
