@@ -51,13 +51,13 @@ var simple = behavior{
 
 var complex = behavior{
 	down: func(amt int, old state) state {
-		return old
+		return state{old.x, old.y, old.aim + amt}
 	},
 	up: func(amt int, old state) state {
-		return old
+		return state{old.x, old.y, old.aim - amt}
 	},
 	forward: func(amt int, old state) state {
-		return old
+		return state{old.x + amt, old.y + old.aim*amt, old.aim}
 	},
 }
 
