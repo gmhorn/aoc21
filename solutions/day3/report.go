@@ -119,16 +119,9 @@ func (r Report) C02() (int64, error) {
 			break
 		}
 
-		var criteria int8
-		sum := report.sumColumn(col)
-		if sum <= loVal {
+		criteria := loVal
+		if report.sumColumn(col) <= loVal {
 			criteria = hiVal
-		}
-		if sum >= hiVal {
-			criteria = loVal
-		}
-		if sum == 0 {
-			criteria = loVal
 		}
 
 		report = report.filter(col, criteria)

@@ -1,9 +1,5 @@
 package day3
 
-import (
-	"errors"
-)
-
 type Solution struct{}
 
 func (sln Solution) Part1(input string) (int, error) {
@@ -25,5 +21,19 @@ func (sln Solution) Part1(input string) (int, error) {
 }
 
 func (sln Solution) Part2(input string) (int, error) {
-	return -1, errors.New("not implemented")
+	report, err := NewReport(input)
+	if err != nil {
+		return -1, err
+	}
+
+	o2, err := report.Oxygen()
+	if err != nil {
+		return -1, err
+	}
+	co2, err := report.C02()
+	if err != nil {
+		return -1, err
+	}
+
+	return int(o2 * co2), nil
 }

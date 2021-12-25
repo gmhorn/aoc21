@@ -12,3 +12,10 @@ func TestPart1(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 198, actual)
 }
+
+func TestPart2(t *testing.T) {
+	s := Solution{}
+	actual, err := s.Part2("testdata.txt")
+	assert.NoError(t, err)
+	assert.Equal(t, 230, actual)
+}
