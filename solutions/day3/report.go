@@ -75,12 +75,70 @@ func (r Report) Epsilon() (int64, error) {
 	return strconv.ParseInt(s, 2, 64)
 }
 
+func (r Report) criteriaPicker(criteria func(Report) Report) {
+	// report := r
+	for col := 0; col < r.width(); col++ {
+		// sum := report.sumColumn(col)
+
+	}
+}
 func (r Report) Oxygen() (int64, error) {
-	return -1, errors.New("not implemented")
+	report := r
+	for col := 0; col < r.width(); col++ {
+		if len(report) == 0 {
+			return -1, errors.New("filtered to 0")
+		}
+
+		if len(report) == 1 {
+			break
+		}
+
+		criteria := hiVal
+		if report.sumColumn(col) <= loVal {
+			criteria = loVal
+		}
+
+		report = report.filter(col, criteria)
+	}
+
+	if len(report) != 1 {
+		return -1, errors.New("didn't filter enough")
+	}
+
+	return report.lineValue(0)
 }
 
 func (r Report) C02() (int64, error) {
-	return -1, errors.New("not implemented")
+	report := r
+	for col := 0; col < r.width(); col++ {
+		if len(report) == 0 {
+			return -1, errors.New("filtered to 0")
+		}
+
+		if len(report) == 1 {
+			break
+		}
+
+		var criteria int8
+		sum := report.sumColumn(col)
+		if sum <= loVal {
+			criteria = hiVal
+		}
+		if sum >= hiVal {
+			criteria = loVal
+		}
+		if sum == 0 {
+			criteria = loVal
+		}
+
+		report = report.filter(col, criteria)
+	}
+
+	if len(report) != 1 {
+		return -1, errors.New("didn't filter enough")
+	}
+
+	return report.lineValue(0)
 }
 
 func (r Report) sumColumn(digit int) int8 {
@@ -94,4 +152,28 @@ func (r Report) sumColumn(digit int) int8 {
 
 func (r Report) width() int {
 	return len(r[0])
+}
+
+func (r Report) lineValue(line int) (int64, error) {
+	s := ""
+	for _, val := range r[line] {
+		if val == loVal {
+			s += string(lo)
+		}
+		if val == hiVal {
+			s += string(hi)
+		}
+	}
+	return strconv.ParseInt(s, 2, 64)
+}
+
+func (r Report) filter(col int, criteria int8) Report {
+	filtered := make([][]int8, 0)
+	for _, line := range r {
+		if line[col] == criteria {
+			filtered = append(filtered, line)
+		}
+	}
+
+	return filtered
 }

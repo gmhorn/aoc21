@@ -23,6 +23,18 @@ func TestReport(t *testing.T) {
 			return r.Epsilon()
 		},
 		expected: 9,
+	}, {
+		name: "oxygen",
+		fn: func(r Report) (int64, error) {
+			return r.Oxygen()
+		},
+		expected: 23,
+	}, {
+		name: "co2",
+		fn: func(r Report) (int64, error) {
+			return r.C02()
+		},
+		expected: 10,
 	}}
 
 	for _, tt := range tests {
