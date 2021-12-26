@@ -18,6 +18,10 @@ type Line struct {
 	X1, Y1, X2, Y2 int
 }
 
+func (l Line) IsRect() bool {
+	return l.X1 == l.X2 || l.Y1 == l.Y2
+}
+
 func CountOverlaps(lines []Line, threshold int) int {
 	counts := make(map[Point]int)
 	for _, line := range lines {
@@ -37,30 +41,37 @@ func CountOverlaps(lines []Line, threshold int) int {
 
 func (l Line) Points() []Point {
 	pts := make([]Point, 0)
-	if l.X1 == l.X2 {
-		for y := min(l.Y1, l.Y2); y <= max(l.Y1, l.Y2); y++ {
-			pts = append(pts, Point{l.X1, y})
-		}
-	}
-	if l.Y1 == l.Y2 {
-		for x := min(l.X1, l.X2); x <= max(l.X1, l.X2); x++ {
-			pts = append(pts, Point{x, l.Y1})
-		}
-	}
 
+	dx := sign(l.X2 - l.X1)
+	dy := sign(l.Y2 - l.Y1)
+	for t := 0; ; t++ {
+		x := l.X1 + t*dx
+		y := l.Y1 + t*dy
+		pts = append(pts, Point{x, y})
+		if x == l.X2 && y == l.Y2 {
+			break
+		}
+	}
 	return pts
 }
 
-func Bounds(lines []Line) Point {
-	bounds := Point{0, 0}
-	for _, line := range lines {
-		bounds.X = max(bounds.X, line.X1, line.X2)
-		bounds.Y = max(bounds.Y, line.Y1, line.Y2)
-	}
-	return bounds
-}
+// func (l Line) Points() []Point {
+// 	pts := make([]Point, 0)
+// 	if l.X1 == l.X2 {
+// 		for y := min(l.Y1, l.Y2); y <= max(l.Y1, l.Y2); y++ {
+// 			pts = append(pts, Point{l.X1, y})
+// 		}
+// 	}
+// 	if l.Y1 == l.Y2 {
+// 		for x := min(l.X1, l.X2); x <= max(l.X1, l.X2); x++ {
+// 			pts = append(pts, Point{x, l.Y1})
+// 		}
+// 	}
 
-func NewLine(s string) (Line, error) {
+// 	return pts
+// }
+
+func ParseLine(s string) (Line, error) {
 	parts := validLine.FindStringSubmatch(s)
 	if len(parts) != 5 {
 		return emptyLine, fmt.Errorf("could not parse '%s'", s)
@@ -97,4 +108,15 @@ func min(vals ...int) int {
 		}
 	}
 	return ret
+}
+
+func sign(a int) int {
+	switch {
+	case a < 0:
+		return -1
+	case a > 0:
+		return 1
+	default:
+		return 0
+	}
 }

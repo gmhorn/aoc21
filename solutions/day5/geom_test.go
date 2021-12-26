@@ -7,17 +7,9 @@ import (
 )
 
 func TestLine(t *testing.T) {
-	l, err := NewLine("1,2 -> 30,40")
+	actual, err := ParseLine("1,2 -> 30,40")
 	assert.NoError(t, err)
-	assert.Equal(t, 1, l.X1)
-	assert.Equal(t, 2, l.Y1)
-	assert.Equal(t, 30, l.X2)
-	assert.Equal(t, 40, l.Y2)
-}
-
-func TestBounds(t *testing.T) {
-	actual := Bounds([]Line{{3, 15, 10, 11}})
-	assert.Equal(t, Point{10, 15}, actual)
+	assert.Equal(t, Line{1, 2, 30, 40}, actual)
 }
 
 func TestCountOverlaps(t *testing.T) {

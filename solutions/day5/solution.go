@@ -17,7 +17,7 @@ func (sln Solution) Part1(input string) (int, error) {
 
 	lines := make([]Line, 0)
 	for idx, str := range strs {
-		line, err := NewLine(str)
+		line, err := ParseLine(str)
 		if err != nil {
 			return -1, fmt.Errorf("could not parse line %d: %v", idx, err)
 		}
