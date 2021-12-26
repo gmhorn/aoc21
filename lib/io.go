@@ -36,3 +36,18 @@ func ReadLines(path string) ([]string, error) {
 
 	return strings.Split(string(b), "\n"), nil
 }
+
+// ParseCSVInts parses a single list of comma-separated integers.
+func ParseCSVInts(s string) ([]int, error) {
+	tVals := strings.Split(s, ",")
+	nVals := make([]int, 0, len(tVals))
+
+	for _, tVal := range tVals {
+		nVal, err := strconv.Atoi(tVal)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse '%s' as int: %v", tVal, err)
+		}
+		nVals = append(nVals, nVal)
+	}
+	return nVals, nil
+}
