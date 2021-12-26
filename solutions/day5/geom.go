@@ -22,23 +22,6 @@ func (l Line) IsRect() bool {
 	return l.X1 == l.X2 || l.Y1 == l.Y2
 }
 
-func CountOverlaps(lines []Line, threshold int) int {
-	counts := make(map[Point]int)
-	for _, line := range lines {
-		for _, point := range line.Points() {
-			counts[point]++
-		}
-	}
-
-	total := 0
-	for _, count := range counts {
-		if count >= threshold {
-			total++
-		}
-	}
-	return total
-}
-
 func (l Line) Points() []Point {
 	pts := make([]Point, 0)
 
@@ -55,21 +38,22 @@ func (l Line) Points() []Point {
 	return pts
 }
 
-// func (l Line) Points() []Point {
-// 	pts := make([]Point, 0)
-// 	if l.X1 == l.X2 {
-// 		for y := min(l.Y1, l.Y2); y <= max(l.Y1, l.Y2); y++ {
-// 			pts = append(pts, Point{l.X1, y})
-// 		}
-// 	}
-// 	if l.Y1 == l.Y2 {
-// 		for x := min(l.X1, l.X2); x <= max(l.X1, l.X2); x++ {
-// 			pts = append(pts, Point{x, l.Y1})
-// 		}
-// 	}
+func CountOverlaps(lines []Line, threshold int) int {
+	counts := make(map[Point]int)
+	for _, line := range lines {
+		for _, point := range line.Points() {
+			counts[point]++
+		}
+	}
 
-// 	return pts
-// }
+	total := 0
+	for _, count := range counts {
+		if count >= threshold {
+			total++
+		}
+	}
+	return total
+}
 
 func ParseLine(s string) (Line, error) {
 	parts := validLine.FindStringSubmatch(s)
@@ -88,26 +72,6 @@ func ParseLine(s string) (Line, error) {
 	}
 
 	return Line{vals[0], vals[1], vals[2], vals[3]}, nil
-}
-
-func max(vals ...int) int {
-	ret := vals[0]
-	for _, v := range vals[1:] {
-		if v > ret {
-			ret = v
-		}
-	}
-	return ret
-}
-
-func min(vals ...int) int {
-	ret := vals[0]
-	for _, v := range vals[1:] {
-		if v < ret {
-			ret = v
-		}
-	}
-	return ret
 }
 
 func sign(a int) int {

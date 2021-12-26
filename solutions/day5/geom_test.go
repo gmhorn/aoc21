@@ -26,5 +26,5 @@ func TestCountOverlaps(t *testing.T) {
 		{5, 5, 8, 2},
 	}
 
-	assert.Equal(t, 5, CountOverlaps(lines, 2))
+	assert.Equal(t, 12, CountOverlaps(lines, 2))
 }
