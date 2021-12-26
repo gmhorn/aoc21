@@ -1,8 +1,6 @@
 package day7
 
 import (
-	"errors"
-	"fmt"
 	"math"
 	"sort"
 
@@ -12,6 +10,14 @@ import (
 type Solution struct{}
 
 func (sln Solution) Part1(input string) (int, error) {
+	return solve(input, linear{})
+}
+
+func (sln Solution) Part2(input string) (int, error) {
+	return solve(input, newGeometric())
+}
+
+func solve(input string, model costModel) (int, error) {
 	lines, err := lib.ReadLines(input)
 	if err != nil {
 		return -1, err
@@ -20,27 +26,57 @@ func (sln Solution) Part1(input string) (int, error) {
 	if err != nil {
 		return -1, nil
 	}
+
 	sort.Ints(positions)
+	start, end := positions[0], positions[len(positions)-1]
+
 	minCost := math.MaxInt
-	for target := positions[0]; target <= positions[len(positions)-1]; target++ {
-		c := cost(positions, target)
-		if c < minCost {
-			minCost = c
+	for target := start; target <= end; target++ {
+		cost := totalCost(positions, target, model)
+		if cost < minCost {
+			minCost = cost
 		}
 	}
+
 	return minCost, nil
 }
 
-func (sln Solution) Part2(input string) (int, error) {
-	return -1, errors.New("not implemented")
-}
-
-func cost(positions []int, target int) int {
+func totalCost(positions []int, target int, model costModel) int {
 	total := 0
 	for _, pos := range positions {
-		total += abs(pos - target)
+		total += model.cost(abs(pos - target))
 	}
 	return total
+}
+
+type costModel interface {
+	cost(dist int) int
+}
+
+type linear struct{}
+
+func (l linear) cost(dist int) int {
+	return dist
+}
+
+type geometric struct {
+	memo map[int]int
+}
+
+func newGeometric() *geometric {
+	return &geometric{memo: make(map[int]int)}
+}
+
+func (g *geometric) cost(dist int) int {
+	if dist <= 1 {
+		return dist
+	}
+	if cost, found := g.memo[dist]; found {
+		return cost
+	}
+	cost := dist + g.cost(dist-1)
+	g.memo[dist] = cost
+	return cost
 }
 
 func abs(a int) int {
