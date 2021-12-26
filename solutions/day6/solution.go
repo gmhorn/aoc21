@@ -1,10 +1,6 @@
 package day6
 
-import (
-	"errors"
-
-	"github.com/gmhorn/aoc21/lib"
-)
+import "github.com/gmhorn/aoc21/lib"
 
 type Solution struct{}
 
@@ -22,7 +18,16 @@ func (sln Solution) Part1(input string) (int, error) {
 }
 
 func (sln Solution) Part2(input string) (int, error) {
-	return -1, errors.New("not implemented")
+	s, err := loadState(input)
+	if err != nil {
+		return -1, err
+	}
+
+	for i := 0; i < 256; i++ {
+		s = nextState(s)
+	}
+
+	return sum(s), nil
 }
 
 const (
