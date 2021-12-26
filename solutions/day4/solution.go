@@ -28,7 +28,28 @@ func (sln Solution) Part1(input string) (int, error) {
 }
 
 func (sln Solution) Part2(input string) (int, error) {
-	return -1, errors.New("not implemented")
+	vals, boards, err := load(input)
+	if err != nil {
+		return -1, err
+	}
+
+	remaining := boards
+	for _, val := range vals {
+		// Iterate from back to front, since more than 1 board can win each round
+		// Assumes final round there's only 1 left...
+		// IDK this seems hacky
+		for idx := len(remaining) - 1; idx >= 0; idx-- {
+			board := remaining[idx]
+			if board.Mark(val) {
+				if len(remaining) == 1 {
+					return val * board.SumOfUnmarked(), nil
+				}
+				remaining = evict(remaining, idx)
+			}
+		}
+	}
+
+	return -1, errors.New("something went wrong")
 }
 
 func load(input string) ([]int, []*Bingo, error) {
@@ -69,4 +90,8 @@ func load(input string) ([]int, []*Bingo, error) {
 	}
 
 	return vals, boards, nil
+}
+
+func evict(boards []*Bingo, index int) []*Bingo {
+	return append(boards[:index], boards[index+1:]...)
 }
