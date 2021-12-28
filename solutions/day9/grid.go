@@ -95,9 +95,46 @@ func (g *Grid) Minima() []int8 {
 func (g *Grid) Basins() []int {
 	sizes := make([]int, 0)
 
+	for _, seed := range g.lowPoints() {
+		sizes = append(sizes, g.basinSize(seed))
+	}
+
 	sort.Slice(sizes, func(i, j int) bool {
 		return sizes[i] > sizes[j]
 	})
 
 	return sizes
+}
+
+// Calculates basin size using flood fill algo (with explicit stack).
+// See https://en.wikipedia.org/wiki/Flood_fill
+func (g *Grid) basinSize(point Point) int {
+	toSearch := []Point{point}
+	visited := make(map[Point]bool)
+	acc := 0
+
+	for len(toSearch) != 0 {
+		node := toSearch[0]
+		toSearch = toSearch[1:]
+
+		if g.Vals[node.Y][node.X] < 9 && !visited[node] {
+			acc++
+			visited[node] = true
+
+			if node.X < g.XMax {
+				toSearch = append(toSearch, Point{node.X + 1, node.Y})
+			}
+			if node.X > 0 {
+				toSearch = append(toSearch, Point{node.X - 1, node.Y})
+			}
+			if node.Y < g.YMax {
+				toSearch = append(toSearch, Point{node.X, node.Y + 1})
+			}
+			if node.Y > 0 {
+				toSearch = append(toSearch, Point{node.X, node.Y - 1})
+			}
+		}
+	}
+
+	return acc
 }
