@@ -2,6 +2,7 @@ package day8
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -97,35 +98,61 @@ func (s Signal) Exclude(other Signal) Signal {
 	return res
 }
 
-type Pattern []rune
-
-// func (p Pattern) Exclude(other Pattern) Pattern {
-// 	idx := 0
-// 	for _, cOther := range other {
-// 		for idx, cPattern := range p {
-// 			if cOther == cPattern {
-// 				break
-// 			}
-// 		}
-// 		if idx < len(pattern)
-// 	}
-// 	remaining := make([]rune, 0)
-// 	for _, c := range p {
-
-// 	}
-
-// 	return remaining
-// }
-
-func ToPattern(str string) Pattern {
-	pat := Pattern(str)
-	sort.Slice(pat, func(i, j int) bool {
-		return pat[i] < pat[j]
+// Contains determines if the given Signal contains the provided rune.
+func (s Signal) Contains(r rune) bool {
+	idx := sort.Search(len(s), func(i int) bool {
+		return s[i] >= r
 	})
-	return pat
+	return idx < len(s) && s[idx] == r
 }
 
-func process(line string) []Signal {
+// Intersect constructs a new Signal that is the rune-wise intersection of this
+// and the other Signal.
+func (s Signal) Intersect(other Signal) Signal {
+	res := make([]rune, 0)
+
+	for _, r := range s {
+		if other.Contains(r) {
+			res = append(res, r)
+		}
+	}
+
+	return res
+}
+
+// Intersection returns a Signal that is the set intersection of the constituent
+// runes of the input Signals.
+func Intersection(input []Signal) Signal {
+	res := input[0]
+	for _, sig := range input[1:] {
+		res = res.Intersect(sig)
+	}
+	return res
+}
+
+// Occurrences counts the number of occurences of the given run in the input
+// signals.
+func Occurrences(r rune, input []Signal) int {
+	occ := 0
+	for _, sig := range input {
+		if sig.Contains(r) {
+			occ++
+		}
+	}
+	return occ
+}
+
+func Frequencies(input []Signal) map[rune]int {
+	freq := make(map[rune]int)
+	for _, sig := range input {
+		for _, r := range sig {
+			freq[r]++
+		}
+	}
+	return freq
+}
+
+func process(line string) map[rune]Signal {
 	// Parse line into list of pattern Signals and list of output Signals
 	// All Signals are using the scrambled alphabet
 	halves := strings.Split(line, "|")
@@ -144,14 +171,51 @@ func process(line string) []Signal {
 		return len(patterns[i]) < len(patterns[j])
 	})
 
-	// candidates := map[rune]Pattern{
-	// 	'A': ToPattern("abcdefg"),
-	// 	'B': ToPattern("abcdefg"),
-	// 	'C': ToPattern("abcdefg"),
-	// 	'D': ToPattern("abcdefg"),
-	// 	'E': ToPattern("abcdefg"),
-	// 	'F': ToPattern("abcdefg"),
-	// 	'G': ToPattern("abcdefg"),
-	// }
-	return patterns
+	// Build a list of candidates to map unscrambled to scrambed runes
+	candidates := make(map[rune]Signal)
+	for _, unscrambled := range alphabetUnscrambled {
+		candidates[unscrambled] = alphabetScrambled
+	}
+
+	// Pattern 0 is for '1', so its runes are candidates for C and F.
+	// candidates['C'] = patterns[0]
+	// candidates['F'] = patterns[0]
+	// Pattern 1 is for '7' and pattern 0 is for '1'.
+	// Exclude '7' - '1' gives the value for A.
+	candidates['A'] = patterns[1].Exclude(patterns[0])
+	// Pattern 0 is for '1', and contains candidates for 'C' and 'F'.
+	// In a 10-element pattern, 'C' will occur 8 times and 'F' 9 times.
+	// Count occurrences to get which is which
+	occ := Occurrences(patterns[0][0], patterns)
+	switch occ {
+	case 8:
+		candidates['C'] = Signal([]rune{patterns[0][0]})
+		candidates['F'] = Signal([]rune{patterns[0][1]})
+	case 9:
+		candidates['C'] = Signal([]rune{patterns[0][1]})
+		candidates['F'] = Signal([]rune{patterns[0][0]})
+	default:
+		// ERROR
+		panic(fmt.Sprintf("Got %d occurences", occ))
+	}
+
+	// We can now exclude Pattern 1 from all other candidates
+	for _, r := range []rune("BDEG") {
+		candidates[r] = candidates[r].Exclude(patterns[1])
+	}
+	// Pattern 2 is for '4'. Exclude pattern for '1' to get candidates for B, D
+	candidates['B'] = patterns[2].Exclude(patterns[0])
+	candidates['D'] = patterns[2].Exclude(patterns[0])
+	// Exclude candidates for B/D for E and G
+	candidates['E'] = candidates['E'].Exclude(candidates['B'])
+	candidates['G'] = candidates['G'].Exclude(candidates['B'])
+	// Intersect 2, 3, 5 to get horizontal runes.
+	// Then remove value for A, which we already know from earlier.
+	// These are the candidates for D and G
+	horiz := Intersection(patterns[3:5])
+	horiz = horiz.Exclude(candidates['A'])
+	candidates['D'] = horiz
+	candidates['G'] = horiz
+
+	return candidates
 }
