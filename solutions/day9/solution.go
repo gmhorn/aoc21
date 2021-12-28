@@ -1,7 +1,5 @@
 package day9
 
-import "errors"
-
 type Solution struct{}
 
 func (sln Solution) Part1(input string) (int, error) {
@@ -18,5 +16,14 @@ func (sln Solution) Part1(input string) (int, error) {
 }
 
 func (sln Solution) Part2(input string) (int, error) {
-	return -1, errors.New("not implemented")
+	grid, err := LoadGrid(input)
+	if err != nil {
+		return -1, err
+	}
+
+	acc := 1
+	for _, basin := range grid.Basins()[:3] {
+		acc *= basin
+	}
+	return acc, nil
 }

@@ -2,14 +2,28 @@ package day9
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 
 	"github.com/gmhorn/aoc21/lib"
 )
 
+// Grid is a structure representing a heightmap of values
+//
+//      0 ------>xMax
+//    0 2199943210
+//    | 3987894921
+//    | 9856789892
+//    V 8767896789
+// yMax 9899965678
 type Grid struct {
 	Vals       [][]int8
 	XMax, YMax int
+}
+
+// Point represents a x,y point on a Grid.
+type Point struct {
+	X, Y int
 }
 
 func LoadGrid(path string) (*Grid, error) {
@@ -39,8 +53,8 @@ func LoadGrid(path string) (*Grid, error) {
 	return grid, nil
 }
 
-func (g *Grid) Minima() []int8 {
-	minima := make([]int8, 0)
+func (g *Grid) lowPoints() []Point {
+	minima := make([]Point, 0)
 	for x := 0; x <= g.XMax; x++ {
 		for y := 0; y <= g.YMax; y++ {
 			val := g.Vals[y][x]
@@ -56,9 +70,34 @@ func (g *Grid) Minima() []int8 {
 			if y > 0 && g.Vals[y-1][x] <= val {
 				continue
 			}
-			minima = append(minima, val)
+			minima = append(minima, Point{x, y})
 		}
 	}
 
 	return minima
+}
+
+// Minima returns the list of minima values, sorted ascending
+func (g *Grid) Minima() []int8 {
+	minima := make([]int8, 0)
+	for _, pt := range g.lowPoints() {
+		minima = append(minima, g.Vals[pt.Y][pt.X])
+	}
+
+	sort.Slice(minima, func(i, j int) bool {
+		return minima[i] < minima[j]
+	})
+
+	return minima
+}
+
+// Basins returns the list of basin sizes, sorted descending
+func (g *Grid) Basins() []int {
+	sizes := make([]int, 0)
+
+	sort.Slice(sizes, func(i, j int) bool {
+		return sizes[i] > sizes[j]
+	})
+
+	return sizes
 }

@@ -1,7 +1,6 @@
 package day9
 
 import (
-	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,11 +18,17 @@ func TestMinima(t *testing.T) {
 	assert.NoError(t, err)
 
 	expected := []int8{0, 1, 5, 5}
-
 	actual := g.Minima()
-	sort.Slice(actual, func(i, j int) bool {
-		return actual[i] < actual[j]
-	})
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestBasins(t *testing.T) {
+	g, err := LoadGrid("testdata.txt")
+	assert.NoError(t, err)
+
+	expected := []int{14, 9, 9, 3}
+	actual := g.Basins()
 
 	assert.Equal(t, expected, actual)
 }
