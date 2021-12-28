@@ -2,7 +2,6 @@ package day8
 
 import (
 	"errors"
-	"fmt"
 	"sort"
 	"strings"
 
@@ -142,7 +141,11 @@ func Occurrences(r rune, input []Signal) int {
 	return occ
 }
 
-func Frequencies(input []Signal) map[rune]int {
+// Frequency is a counter for the occurrencies of each rune
+type Frequency map[rune]int
+
+// Frequencies constructs a new Frequency from the list of input Signals
+func Frequencies(input []Signal) Frequency {
 	freq := make(map[rune]int)
 	for _, sig := range input {
 		for _, r := range sig {
@@ -150,6 +153,61 @@ func Frequencies(input []Signal) map[rune]int {
 		}
 	}
 	return freq
+}
+
+// SignalFor constructs a signal consisting only of runes that have the given
+// frequency.
+func (f Frequency) SignalFor(count int) Signal {
+	runes := make([]rune, 0)
+	for r, cnt := range f {
+		if cnt == count {
+			runes = append(runes, r)
+		}
+	}
+	// can't just return runes because no guarantee that `range` iterates
+	// in any particular order, and Signals must be sorted.
+	// So go []rune -> string -> Signal, and NewSignal sorts for us.
+	return NewSignal(string(runes))
+}
+
+func decode(patterns []Signal) map[rune]rune {
+	// Sort patterns by length
+	sort.Slice(patterns, func(i, j int) bool {
+		return len(patterns[i]) < len(patterns[j])
+	})
+
+	// Now we have the following:
+	//
+	// pattern Idx | 0 | 1 | 2 | 3 4 5 | 6 7 8 | 9
+	// ------------|---|---|---|-------|-------|---
+	// Display Num | 1 | 7 | 4 | 2,3,5 | 0,6,9 | 8
+
+	// Candidates is the map of unscrambled runes to the list of scrambled runes
+	// which may match it
+	candidates := make(map[rune]Signal)
+
+	// Start with frequency analysis to build our list of candidates
+	// In a 10-element list, we have the following frequencies
+	//
+	// Element   | A | B | C | D | E | F | G
+	// ----------|---|---|---|---|---|---|---
+	// Frequency | 8 | 6 | 8 | 7 | 4 | 9 | 7
+	freqs := Frequencies(patterns)
+
+	// We can immediately decode 'B', 'E' and 'F' because they have unique
+	// frequencies
+	candidates['B'] = freqs.SignalFor(6)
+	candidates['E'] = freqs.SignalFor(4)
+	candidates['F'] = freqs.SignalFor(9)
+
+	// To get 'C' exclude the signal for 'F' from the pattern for '1'
+	candidates['C'] = patterns[0].Exclude(candidates['F'])
+	// Similarly, to get 'A' exclude the pattern for '1' from the pattern for '7'
+	candidates['A'] = patterns[1].Exclude(patterns[0])
+
+	// All that remains is candidates for 'D' and 'G' (both freq 7)
+
+	return nil
 }
 
 func process(line string) map[rune]Signal {
@@ -177,45 +235,53 @@ func process(line string) map[rune]Signal {
 		candidates[unscrambled] = alphabetScrambled
 	}
 
-	// Pattern 0 is for '1', so its runes are candidates for C and F.
-	// candidates['C'] = patterns[0]
-	// candidates['F'] = patterns[0]
-	// Pattern 1 is for '7' and pattern 0 is for '1'.
-	// Exclude '7' - '1' gives the value for A.
-	candidates['A'] = patterns[1].Exclude(patterns[0])
-	// Pattern 0 is for '1', and contains candidates for 'C' and 'F'.
-	// In a 10-element pattern, 'C' will occur 8 times and 'F' 9 times.
-	// Count occurrences to get which is which
-	occ := Occurrences(patterns[0][0], patterns)
-	switch occ {
-	case 8:
-		candidates['C'] = Signal([]rune{patterns[0][0]})
-		candidates['F'] = Signal([]rune{patterns[0][1]})
-	case 9:
-		candidates['C'] = Signal([]rune{patterns[0][1]})
-		candidates['F'] = Signal([]rune{patterns[0][0]})
-	default:
-		// ERROR
-		panic(fmt.Sprintf("Got %d occurences", occ))
-	}
+	// Start with some frequency analysis. In unscrambled terms, 'B', 'E' and
+	// 'F' have unique number of appearances (at 6, 4 and 9) respectively.
+	// So we can knock those right out.
+	freq := Frequencies(patterns)
+	candidates['B'] = freq.SignalFor(6)
+	candidates['E'] = freq.SignalFor(4)
+	candidates['F'] = freq.SignalFor(9)
 
-	// We can now exclude Pattern 1 from all other candidates
-	for _, r := range []rune("BDEG") {
-		candidates[r] = candidates[r].Exclude(patterns[1])
-	}
-	// Pattern 2 is for '4'. Exclude pattern for '1' to get candidates for B, D
-	candidates['B'] = patterns[2].Exclude(patterns[0])
-	candidates['D'] = patterns[2].Exclude(patterns[0])
-	// Exclude candidates for B/D for E and G
-	candidates['E'] = candidates['E'].Exclude(candidates['B'])
-	candidates['G'] = candidates['G'].Exclude(candidates['B'])
-	// Intersect 2, 3, 5 to get horizontal runes.
-	// Then remove value for A, which we already know from earlier.
-	// These are the candidates for D and G
-	horiz := Intersection(patterns[3:5])
-	horiz = horiz.Exclude(candidates['A'])
-	candidates['D'] = horiz
-	candidates['G'] = horiz
+	// // Pattern 0 is for '1', so its runes are candidates for C and F.
+	// // candidates['C'] = patterns[0]
+	// // candidates['F'] = patterns[0]
+	// // Pattern 1 is for '7' and pattern 0 is for '1'.
+	// // Exclude '7' - '1' gives the value for A.
+	// candidates['A'] = patterns[1].Exclude(patterns[0])
+	// // Pattern 0 is for '1', and contains candidates for 'C' and 'F'.
+	// // In a 10-element pattern, 'C' will occur 8 times and 'F' 9 times.
+	// // Count occurrences to get which is which
+	// occ := Occurrences(patterns[0][0], patterns)
+	// switch occ {
+	// case 8:
+	// 	candidates['C'] = Signal([]rune{patterns[0][0]})
+	// 	candidates['F'] = Signal([]rune{patterns[0][1]})
+	// case 9:
+	// 	candidates['C'] = Signal([]rune{patterns[0][1]})
+	// 	candidates['F'] = Signal([]rune{patterns[0][0]})
+	// default:
+	// 	// ERROR
+	// 	panic(fmt.Sprintf("Got %d occurences", occ))
+	// }
+
+	// // We can now exclude Pattern 1 from all other candidates
+	// for _, r := range []rune("BDEG") {
+	// 	candidates[r] = candidates[r].Exclude(patterns[1])
+	// }
+	// // Pattern 2 is for '4'. Exclude pattern for '1' to get candidates for B, D
+	// candidates['B'] = patterns[2].Exclude(patterns[0])
+	// candidates['D'] = patterns[2].Exclude(patterns[0])
+	// // Exclude candidates for B/D for E and G
+	// candidates['E'] = candidates['E'].Exclude(candidates['B'])
+	// candidates['G'] = candidates['G'].Exclude(candidates['B'])
+	// // Intersect 2, 3, 5 to get horizontal runes.
+	// // Then remove value for A, which we already know from earlier.
+	// // These are the candidates for D and G
+	// horiz := Intersection(patterns[3:5])
+	// horiz = horiz.Exclude(candidates['A'])
+	// candidates['D'] = horiz
+	// candidates['G'] = horiz
 
 	return candidates
 }
