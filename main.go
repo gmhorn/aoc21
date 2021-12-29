@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gmhorn/aoc21/solutions/day1"
+	"github.com/gmhorn/aoc21/solutions/day10"
 	"github.com/gmhorn/aoc21/solutions/day2"
 	"github.com/gmhorn/aoc21/solutions/day3"
 	"github.com/gmhorn/aoc21/solutions/day4"
@@ -31,6 +32,7 @@ var solns = []solution{
 	day7.Solution{},
 	day8.Solution{},
 	day9.Solution{},
+	day10.Solution{},
 }
 
 func main() {
