@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gmhorn/aoc21/solutions/day1"
+	"github.com/gmhorn/aoc21/solutions/day01"
+	"github.com/gmhorn/aoc21/solutions/day02"
+	"github.com/gmhorn/aoc21/solutions/day03"
+	"github.com/gmhorn/aoc21/solutions/day04"
+	"github.com/gmhorn/aoc21/solutions/day05"
+	"github.com/gmhorn/aoc21/solutions/day06"
+	"github.com/gmhorn/aoc21/solutions/day07"
+	"github.com/gmhorn/aoc21/solutions/day08"
+	"github.com/gmhorn/aoc21/solutions/day09"
 	"github.com/gmhorn/aoc21/solutions/day10"
-	"github.com/gmhorn/aoc21/solutions/day2"
-	"github.com/gmhorn/aoc21/solutions/day3"
-	"github.com/gmhorn/aoc21/solutions/day4"
-	"github.com/gmhorn/aoc21/solutions/day5"
-	"github.com/gmhorn/aoc21/solutions/day6"
-	"github.com/gmhorn/aoc21/solutions/day7"
-	"github.com/gmhorn/aoc21/solutions/day8"
-	"github.com/gmhorn/aoc21/solutions/day9"
 )
 
 type solution interface {
