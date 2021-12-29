@@ -1,6 +1,8 @@
 package day11
 
-import "errors"
+import (
+	"errors"
+)
 
 type Solution struct{}
 
