@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gmhorn/aoc21/solutions/day1"
+	"github.com/gmhorn/aoc21/solutions/day01"
+	"github.com/gmhorn/aoc21/solutions/day02"
+	"github.com/gmhorn/aoc21/solutions/day03"
+	"github.com/gmhorn/aoc21/solutions/day04"
+	"github.com/gmhorn/aoc21/solutions/day05"
+	"github.com/gmhorn/aoc21/solutions/day06"
+	"github.com/gmhorn/aoc21/solutions/day07"
+	"github.com/gmhorn/aoc21/solutions/day08"
+	"github.com/gmhorn/aoc21/solutions/day09"
 	"github.com/gmhorn/aoc21/solutions/day10"
-	"github.com/gmhorn/aoc21/solutions/day2"
-	"github.com/gmhorn/aoc21/solutions/day3"
-	"github.com/gmhorn/aoc21/solutions/day4"
-	"github.com/gmhorn/aoc21/solutions/day5"
-	"github.com/gmhorn/aoc21/solutions/day6"
-	"github.com/gmhorn/aoc21/solutions/day7"
-	"github.com/gmhorn/aoc21/solutions/day8"
-	"github.com/gmhorn/aoc21/solutions/day9"
 )
 
 type solution interface {
@@ -23,15 +23,15 @@ type solution interface {
 }
 
 var solns = []solution{
-	day1.Solution{},
-	day2.Solution{},
-	day3.Solution{},
-	day4.Solution{},
-	day5.Solution{},
-	day6.Solution{},
-	day7.Solution{},
-	day8.Solution{},
-	day9.Solution{},
+	day01.Solution{},
+	day02.Solution{},
+	day03.Solution{},
+	day04.Solution{},
+	day05.Solution{},
+	day06.Solution{},
+	day07.Solution{},
+	day08.Solution{},
+	day09.Solution{},
 	day10.Solution{},
 }
 
@@ -46,7 +46,7 @@ func main() {
 
 	// Days are 1-indexed, arrays are 0-indexed
 	soln := solns[day-1]
-	input := fmt.Sprintf("input/day%d.txt", day)
+	input := fmt.Sprintf("input/day%02d.txt", day)
 
 	switch part {
 	case 1:
