@@ -1,4 +1,4 @@
-package day6
+package day06
 
 import "github.com/gmhorn/aoc21/lib"
 
