@@ -1,7 +1,7 @@
 package day10
 
 import (
-	"errors"
+	"sort"
 
 	"github.com/gmhorn/aoc21/lib"
 )
@@ -24,7 +24,36 @@ func (sln Solution) Part1(input string) (int, error) {
 }
 
 func (sln Solution) Part2(input string) (int, error) {
-	return -1, errors.New("not implemented")
+	lines, err := lib.ReadLines(input)
+	if err != nil {
+		return -1, err
+	}
+
+	scores := make([]int, 0)
+	for _, line := range lines {
+		if score, result := parse(line); result == resultIncomplete {
+			scores = append(scores, score)
+		}
+	}
+
+	sort.Sort(sort.IntSlice(scores))
+	idx := int(len(scores) / 2)
+	return scores[idx], nil
+}
+
+func scoreAll(input string, result result) (int, error) {
+	lines, err := lib.ReadLines(input)
+	if err != nil {
+		return -1, err
+	}
+
+	total := 0
+	for _, line := range lines {
+		if score, res := parse(line); res == result {
+			total += score
+		}
+	}
+	return total, nil
 }
 
 type result int
@@ -58,10 +87,10 @@ var corruptValue = map[rune]int{
 }
 
 var completeValue = map[rune]int{
-	')': 1,
-	']': 2,
-	'}': 3,
-	'>': 4,
+	'(': 1,
+	'[': 2,
+	'{': 3,
+	'<': 4,
 }
 
 func parse(line string) (int, result) {
@@ -92,5 +121,22 @@ func parse(line string) (int, result) {
 		// any other character isn't part of our grammer - just let it go
 	}
 
-	return 0, resultOk
+	// if stack is empty, we have a clean parse
+	if stack.Empty() {
+		return 0, resultOk
+	}
+
+	// Otherwise we have an incomplete parse.
+	// Compute the score.
+	res := resultOk
+	score := 0
+
+	opener, err := stack.Pop()
+	for ; err == nil; opener, err = stack.Pop() {
+		res = resultIncomplete
+		score *= 5
+		score += completeValue[opener]
+	}
+
+	return score, res
 }

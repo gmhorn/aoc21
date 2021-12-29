@@ -19,6 +19,18 @@ func TestParse(t *testing.T) {
 		line:   "{([(<{}[<>[]}>{[]{[(<()>",
 		result: resultCorrupted,
 		score:  1197,
+	}, {
+		line:   "<{([{{}}[<[[[<>{}]]]>[]]",
+		result: resultIncomplete,
+		score:  294,
+	}, {
+		line:   "[({(<(())[]>[[{[]{<()<>>",
+		result: resultIncomplete,
+		score:  288957,
+	}, {
+		line:   "[(()[<>])]({[<{<<[]>>(",
+		result: resultIncomplete,
+		score:  5566,
 	}}
 
 	for _, tt := range tests {
