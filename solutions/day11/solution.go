@@ -1,8 +1,6 @@
 package day11
 
 import (
-	"errors"
-
 	"github.com/gmhorn/aoc21/lib"
 )
 
@@ -25,7 +23,21 @@ func (sln Solution) Part1(input string) (int, error) {
 }
 
 func (sln Solution) Part2(input string) (int, error) {
-	return -1, errors.New("not implemented")
+	var threshold uint8 = 9
+
+	grid, err := lib.LoadGrid(input)
+	if err != nil {
+		return -1, err
+	}
+
+	allFlashed := grid.Rows * grid.Cols
+	steps := 1
+	for ; ; steps++ {
+		if advance(grid, threshold) == allFlashed {
+			break
+		}
+	}
+	return steps, nil
 }
 
 // advance advances the Grid according to the rules of the problem statement. It
