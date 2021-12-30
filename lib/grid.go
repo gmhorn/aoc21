@@ -6,13 +6,6 @@ import (
 	"strings"
 )
 
-// GridCoord is a simple struct to how a (Row, Column) Grid coordinate.
-// Typically only useful for storing in larger data structures such as slices
-// or maps.
-type GridCoord struct {
-	Row, Col int
-}
-
 // Grid is a 2D grid of uint8 values.
 //
 // Internally data is stored row-major, so Vals[0] gives the first row, and
@@ -75,26 +68,44 @@ const (
 	AdjacencyMode8Way AdjacencyMode = 2
 )
 
-func (g *Grid) Neighbors(origin GridCoord, mode AdjacencyMode) []GridCoord {
-	nbrs := make([]GridCoord, 0)
+type VisitFunc func(row, col int, val uint8) bool
+
+func (g *Grid) ForEach(fn VisitFunc) {
+	for r, row := range g.Vals {
+		for c, val := range row {
+			if !fn(r, c, val) {
+				return
+			}
+		}
+	}
+}
+
+func (g *Grid) ForEachNeighbor(row, col int, mode AdjacencyMode, fn VisitFunc) {
 	for dx := -1; dx <= 1; dx++ {
 		for dy := -1; dy <= 1; dy++ {
-			// First calculate the "distance" and exclude dist 0 (origin itself)
-			// and distances greater than the mode. This has the effect where
-			// if mode is 4way, only distance 1 works (cardinal directions) but
-			// for 8 way we get distance 2 (diagonals) included as well
-			dist := IntAbs(dx) + IntAbs(dy)
+			// Get row and column we're visiting
+			rowVisit, colVisit := row+dx, col+dy
+			// Skip if out of bounds
+			if rowVisit < 0 || rowVisit >= g.Rows {
+				continue
+			}
+			if colVisit < 0 || colVisit >= g.Cols {
+				continue
+			}
+			// Calculate "distance" and exclude dist 0 (origin itself) and
+			// distances greater than the mode. So for mode 4 we only visit
+			// cardinal directions (dist==1) and for mode 8 we visit cardinal
+			// and diagonal (dist==2).
+			dist := dx*dx + dy*dy
 			if dist == 0 || dist > int(mode) {
 				continue
 			}
 
-			pt := GridCoord{origin.Row + dx, origin.Col + dy}
-			if pt.Row < 0 || pt.Col < 0 || pt.Row >= g.Rows || pt.Col >= g.Cols {
-				continue
+			// Now actual visit the node
+			// If fn returns false, stop visiting and return
+			if !fn(rowVisit, colVisit, g.Vals[rowVisit][colVisit]) {
+				return
 			}
-
-			nbrs = append(nbrs, pt)
 		}
 	}
-	return nbrs
 }

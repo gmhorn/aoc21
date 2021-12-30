@@ -40,23 +40,27 @@ func (sln Solution) Part2(input string) (int, error) {
 	return steps, nil
 }
 
+type coord struct {
+	row, col int
+}
+
 // advance advances the Grid according to the rules of the problem statement. It
 // returns the number of elements that "flashed" above the given threshold.
 func advance(grid *lib.Grid, threshold uint8) int {
-	toFlash := make([]lib.GridCoord, 0)
-	flashed := make(map[lib.GridCoord]bool)
+	toFlash := make([]coord, 0)
+	flashed := make(map[coord]bool)
 
-	// do initial increment
-	for r := 0; r < grid.Rows; r++ {
-		for c := 0; c < grid.Cols; c++ {
-			grid.Vals[r][c]++
-			// if we're above threshold, add that point to our list of coords
-			// that need to be flashed
-			if grid.Vals[r][c] > threshold {
-				toFlash = append(toFlash, lib.GridCoord{r, c})
-			}
+	increment := lib.VisitFunc(func(row, col int, _ uint8) bool {
+		grid.Vals[row][col]++
+		// If above threshold, add to list of nodes to process for flash
+		if grid.Vals[row][col] > threshold {
+			toFlash = append(toFlash, coord{row, col})
 		}
-	}
+		return true
+	})
+
+	// Do initial increment
+	grid.ForEach(increment)
 
 	// Process flashes until we quiesce
 	for len(toFlash) != 0 {
@@ -64,29 +68,21 @@ func advance(grid *lib.Grid, threshold uint8) int {
 		node := toFlash[0]
 		toFlash = toFlash[1:]
 
-		// Check if we've already flashed this node. If so, don't process a
-		// second time
-		if flashed[node] {
-			continue
-		}
-
-		// At this point, execute the node's flash:
-		// 1. Mark it as flashed
-		flashed[node] = true
-		// 2. Increment all its neighbors
-		for _, nbr := range grid.Neighbors(node, lib.AdjacencyMode8Way) {
-			grid.Vals[nbr.Row][nbr.Col]++
-			// 3. If neighbor is above flash threshold add it to the list
-			if grid.Vals[nbr.Row][nbr.Col] > threshold {
-				toFlash = append(toFlash, nbr)
-			}
+		// Its possible this node could have already been flashed and re-added
+		// to the list this round, so check first to avoid processing twice
+		if !flashed[node] {
+			// Now execute the flash:
+			// 1. Mark as flashed
+			flashed[node] = true
+			// 2. Increment its neighbors
+			grid.ForEachNeighbor(node.row, node.col, lib.AdjacencyMode8Way, increment)
 		}
 	}
 
 	// Reset all flashed coords to 0 while counting total
 	total := 0
 	for node := range flashed {
-		grid.Vals[node.Row][node.Col] = 0
+		grid.Vals[node.row][node.col] = 0
 		total++
 	}
 	return total
