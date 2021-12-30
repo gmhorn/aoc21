@@ -6,7 +6,17 @@ import (
 	"strings"
 )
 
+// GridCoord is a simple struct to how a (Row, Column) Grid coordinate.
+// Typically only useful for storing in larger data structures such as slices
+// or maps.
+type GridCoord struct {
+	Row, Col int
+}
+
 // Grid is a 2D grid of uint8 values.
+//
+// Internally data is stored row-major, so Vals[0] gives the first row, and
+// Vals[1][2] gives the 2nd row's 3rd element.
 type Grid struct {
 	Vals       [][]uint8
 	Rows, Cols int
@@ -56,4 +66,35 @@ func (g *Grid) String() string {
 		}
 	}
 	return strings.Join(lines, "\n")
+}
+
+type AdjacencyMode int
+
+const (
+	AdjacencyMode4Way AdjacencyMode = 1
+	AdjacencyMode8Way AdjacencyMode = 2
+)
+
+func (g *Grid) Neighbors(origin GridCoord, mode AdjacencyMode) []GridCoord {
+	nbrs := make([]GridCoord, 0)
+	for dx := -1; dx <= 1; dx++ {
+		for dy := -1; dy <= 1; dy++ {
+			// First calculate the "distance" and exclude dist 0 (origin itself)
+			// and distances greater than the mode. This has the effect where
+			// if mode is 4way, only distance 1 works (cardinal directions) but
+			// for 8 way we get distance 2 (diagonals) included as well
+			dist := IntAbs(dx) + IntAbs(dy)
+			if dist == 0 || dist > int(mode) {
+				continue
+			}
+
+			pt := GridCoord{origin.Row + dx, origin.Col + dy}
+			if pt.Row < 0 || pt.Col < 0 || pt.Row >= g.Rows || pt.Col >= g.Cols {
+				continue
+			}
+
+			nbrs = append(nbrs, pt)
+		}
+	}
+	return nbrs
 }
