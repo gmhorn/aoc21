@@ -44,7 +44,7 @@ func lowPoints(grid *lib.Grid) []coord {
 	minima := make([]coord, 0)
 	grid.ForEach(func(row, col int, val uint8) bool {
 		isMin := true
-		grid.VisitNeighbors(row, col, lib.AdjacencyMode4Way, func(_, _ int, valOther uint8) bool {
+		grid.ForEachNeighbor(row, col, lib.AdjacencyMode4Way, func(_, _ int, valOther uint8) bool {
 			if valOther <= val {
 				isMin = false
 			}
@@ -83,7 +83,7 @@ func basinSize(grid *lib.Grid, start coord, threshold uint8) int {
 			acc++
 
 			// add its neighbors to our list of nodes to search
-			grid.VisitNeighbors(node.row, node.col, lib.AdjacencyMode4Way, addToSearch)
+			grid.ForEachNeighbor(node.row, node.col, lib.AdjacencyMode4Way, addToSearch)
 		}
 	}
 	return acc
