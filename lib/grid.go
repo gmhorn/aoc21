@@ -87,6 +87,36 @@ func (g *Grid) ForEach(fn VisitFunc) {
 	}
 }
 
+func (g *Grid) ForEachNeighbor(row, col int, mode AdjacencyMode, fn VisitFunc) {
+	for dx := -1; dx <= 1; dx++ {
+		for dy := -1; dy <= 1; dy++ {
+			// Get row and column we're visiting
+			rowVisit, colVisit := row+dx, col+dy
+			// Skip if out of bounds
+			if rowVisit < 0 || rowVisit >= g.Rows {
+				continue
+			}
+			if colVisit < 0 || colVisit >= g.Cols {
+				continue
+			}
+			// Calculate "distance" and exclude dist 0 (origin itself) and
+			// distances greater than the mode. So for mode 4 we only visit
+			// cardinal directions (dist==1) and for mode 8 we visit cardinal
+			// and diagonal (dist==2).
+			dist := dx*dx + dy*dy
+			if dist == 0 || dist > int(mode) {
+				continue
+			}
+
+			// Now actual visit the node
+			// If fn returns false, stop visiting and return
+			if !fn(rowVisit, colVisit, g.Vals[rowVisit][colVisit]) {
+				return
+			}
+		}
+	}
+}
+
 func (g *Grid) VisitNeighbors(row, col int, mode AdjacencyMode, fn VisitFunc) {
 	for dx := -1; dx <= 1; dx++ {
 		for dy := -1; dy <= 1; dy++ {
