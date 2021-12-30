@@ -9,8 +9,8 @@ import (
 type Solution struct{}
 
 func (sln Solution) Part1(input string) (int, error) {
-	steps := 100
-	threshold := 9
+	var steps = 100
+	var threshold uint8 = 9
 
 	grid, err := lib.LoadGrid(input)
 	if err != nil {
@@ -48,17 +48,34 @@ func advance(grid *lib.Grid, threshold uint8) int {
 
 	// Process flashes until we quiesce
 	for len(toFlash) != 0 {
-		// node := toFlash[0]
-		// toFlash = toFlash[1:]
+		// Pop node off list
+		node := toFlash[0]
+		toFlash = toFlash[1:]
+
+		// Check if we've already flashed this node. If so, don't process a
+		// second time
+		if flashed[node] {
+			continue
+		}
+
+		// At this point, execute the node's flash:
+		// 1. Mark it as flashed
+		flashed[node] = true
+		// 2. Increment all its neighbors
+		for _, nbr := range grid.Neighbors(node, lib.AdjacencyMode8Way) {
+			grid.Vals[nbr.Row][nbr.Col]++
+			// 3. If neighbor is above flash threshold add it to the list
+			if grid.Vals[nbr.Row][nbr.Col] > threshold {
+				toFlash = append(toFlash, nbr)
+			}
+		}
 	}
 
 	// Reset all flashed coords to 0 while counting total
 	total := 0
-	for node, _ := range flashed {
+	for node := range flashed {
 		grid.Vals[node.Row][node.Col] = 0
 		total++
 	}
 	return total
 }
-
-func surroundingPoints(grid *lib.Grid, origin )
