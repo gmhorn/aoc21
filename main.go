@@ -16,6 +16,7 @@ import (
 	"github.com/gmhorn/aoc21/solutions/day09"
 	"github.com/gmhorn/aoc21/solutions/day10"
 	"github.com/gmhorn/aoc21/solutions/day11"
+	"github.com/gmhorn/aoc21/solutions/day12"
 )
 
 type solution interface {
@@ -35,6 +36,7 @@ var solns = []solution{
 	day09.Solution{},
 	day10.Solution{},
 	day11.Solution{},
+	day12.Solution{},
 }
 
 func main() {
